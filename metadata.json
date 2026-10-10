@@ -1,0 +1,6 @@
+{
+  "name": "BSF 罗马书经文分析工作台 (Homiletics)",
+  "description": "专为2026-2027中文BSF罗马书设计的讲道法式研经分析工作台，内置完整30周课表与经文库、中英文切换、人名地名字数折算及BSF标准大纲导出。",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

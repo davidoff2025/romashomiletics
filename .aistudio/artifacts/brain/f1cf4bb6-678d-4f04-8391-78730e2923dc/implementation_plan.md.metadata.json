@@ -1,0 +1,6 @@
+{
+  "summary":  "Updated implementation plan incorporating the user's specific BSF Homiletics rules: 1) Strict word count rules (English 10 words, Chinese 20 characters, with biblical persons and place names counted as a single word/character), and 2) Language toggle mode (switching seamlessly between Chinese and English modes rather than forced simultaneous dual view).",
+  "updatedAt":  "2026-10-10T12:34:28.249540769Z",
+  "requestFeedback":  true,
+  "userFacing":  true
+}
