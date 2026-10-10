@@ -19,6 +19,7 @@ interface CurriculumListProps {
   completedLessons: Set<string>;
   onToggleComplete: (lessonId: string) => void;
   language: LanguageMode;
+  currentUser?: string;
 }
 
 export const CurriculumList: React.FC<CurriculumListProps> = ({
@@ -27,6 +28,7 @@ export const CurriculumList: React.FC<CurriculumListProps> = ({
   completedLessons,
   onToggleComplete,
   language,
+  currentUser,
 }) => {
   const isZh = language === 'zh';
   const [searchTerm, setSearchTerm] = useState('');
@@ -64,7 +66,12 @@ export const CurriculumList: React.FC<CurriculumListProps> = ({
           </div>
 
           {/* Quick stats */}
-          <div className="flex items-center gap-3 text-xs font-sans">
+          <div className="flex items-center gap-2.5 text-xs font-sans flex-wrap">
+            {currentUser && (
+              <div className="px-3 py-1.5 rounded-lg bg-amber-50/80 border border-amber-200/80 text-stone-800 font-serif font-semibold">
+                {isZh ? `研经学员：${currentUser}` : `Learner: ${currentUser}`}
+              </div>
+            )}
             <div className="px-3 py-1.5 rounded-lg bg-stone-100 text-stone-700 font-medium">
               {isZh ? '完成进度：' : 'Progress: '}
               <span className="font-bold font-mono text-stone-900">

@@ -7,6 +7,7 @@ import {
   HelpCircle,
   Printer,
   Edit3,
+  User,
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -17,6 +18,8 @@ interface HeaderProps {
   onOpenExportModal: () => void;
   completedCount: number;
   totalLessons: number;
+  currentUser: string;
+  onOpenUserSwitcher: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -27,6 +30,8 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenExportModal,
   completedCount,
   totalLessons,
+  currentUser,
+  onOpenUserSwitcher,
 }) => {
   const isZh = language === 'zh';
 
@@ -105,8 +110,22 @@ export const Header: React.FC<HeaderProps> = ({
             ))}
           </nav>
 
-          {/* Right Actions: Language Switch + Export Button */}
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          {/* Right Actions: Learner Profile + Language Switch + Export Button */}
+          <div className="flex items-center gap-1.5 xs:gap-2 sm:gap-3 shrink-0">
+            {/* Learner Switcher Button */}
+            <button
+              onClick={onOpenUserSwitcher}
+              title={isZh ? `当前研经学员：${currentUser}（点击切换学员）` : `Active Learner: ${currentUser} (Click to switch)`}
+              className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1 sm:py-1.5 text-xs font-medium border border-stone-300 rounded-lg bg-white hover:border-stone-400 hover:bg-stone-50 transition-colors shadow-2xs text-stone-800"
+            >
+              <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-stone-900 text-amber-100 flex items-center justify-center font-bold text-[9px] sm:text-[10px] shrink-0">
+                {currentUser.slice(0, 1).toUpperCase()}
+              </div>
+              <span className="font-semibold truncate max-w-[64px] xs:max-w-[90px] sm:max-w-[120px] font-serif text-stone-900 text-xs">
+                {currentUser}
+              </span>
+            </button>
+
             {/* Language Switch Button */}
             <button
               onClick={onToggleLanguage}
@@ -132,7 +151,7 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Primary Action Button (Print / Export) */}
             <button
               onClick={onOpenExportModal}
-              className="inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1.5 text-xs font-semibold text-white bg-stone-900 rounded-lg hover:bg-stone-800 transition-colors shadow-xs whitespace-nowrap"
+              className="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3.5 py-1 sm:py-1.5 text-xs font-semibold text-white bg-stone-900 rounded-lg hover:bg-stone-800 transition-colors shadow-xs whitespace-nowrap"
             >
               <Printer className="w-3.5 h-3.5" />
               <span className="hidden xs:inline">{isZh ? '导出/打印' : 'Export'}</span>

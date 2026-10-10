@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Lesson, HomileticsRecord, LanguageMode } from './types/bsf';
 import { BSF_CURRICULUM } from './data/curriculum';
 import {
+  getActiveUser,
+  setActiveUser,
+  DEFAULT_USER,
   loadHomileticsRecord,
   saveHomileticsRecord,
   getCompletedLessons,
@@ -14,6 +17,7 @@ import { CurriculumList } from './components/CurriculumList';
 import { OutlineSummaryView } from './components/OutlineSummaryView';
 import { BsfGuidelinesModal } from './components/BsfGuidelinesModal';
 import { HomileticsExportModal } from './components/HomileticsExportModal';
+import { UserSwitcherModal } from './components/UserSwitcherModal';
 import {
   ChevronLeft,
   ChevronRight,
@@ -30,10 +34,12 @@ export default function App() {
   const [currentLessonId, setCurrentLessonId] = useState<string>('1');
   const [currentWorkbenchStep, setCurrentWorkbenchStep] = useState<number>(1);
   const [mobileWorkbenchView, setMobileWorkbenchView] = useState<'coach' | 'scripture' | 'split'>('coach');
-  const [completedLessons, setCompletedLessons] = useState<Set<string>>(new Set());
+  const [currentUser, setCurrentUser] = useState<string>(() => getActiveUser());
+  const [isUserSwitcherOpen, setIsUserSwitcherOpen] = useState(false);
+  const [completedLessons, setCompletedLessons] = useState<Set<string>>(() => getCompletedLessons(getActiveUser()));
 
   // Current homiletics record
-  const [record, setRecord] = useState<HomileticsRecord>(() => loadHomileticsRecord('1'));
+  const [record, setRecord] = useState<HomileticsRecord>(() => loadHomileticsRecord('1', getActiveUser()));
 
   // Export Modal state
   const [isExportOpen, setIsExportOpen] = useState(false);
@@ -42,8 +48,8 @@ export default function App() {
 
   // Initialize and seed lesson 1 if empty
   useEffect(() => {
-    const existing = loadHomileticsRecord('1');
-    if (!existing.subjectSentenceZh && !existing.subjectSentenceEn) {
+    const existing = loadHomileticsRecord('1', currentUser);
+    if (!existing.subjectSentenceZh && !existing.subjectSentenceEn && currentUser.toLowerCase() === DEFAULT_USER.toLowerCase()) {
       existing.contentList = [
         {
           id: 'item_1',
@@ -177,25 +183,33 @@ export default function App() {
           app2En: 'Am I relying on my own deeds or on God’s sovereign power?',
         },
       ];
-      saveHomileticsRecord(existing);
+      saveHomileticsRecord(existing, currentUser);
       setRecord(existing);
     }
 
-    setCompletedLessons(getCompletedLessons());
-  }, []);
+    setCompletedLessons(getCompletedLessons(currentUser));
+  }, [currentUser]);
 
-  // Update record when switching lessons
+  // Update record when switching lessons or user
   useEffect(() => {
-    const loaded = loadHomileticsRecord(currentLessonId);
+    const loaded = loadHomileticsRecord(currentLessonId, currentUser);
     setRecord(loaded);
-  }, [currentLessonId]);
+  }, [currentLessonId, currentUser]);
 
   const currentLesson = BSF_CURRICULUM.find((l) => l.id === currentLessonId) || BSF_CURRICULUM[2];
 
+  const handleSwitchUser = (newUserName: string) => {
+    const savedName = setActiveUser(newUserName);
+    setCurrentUser(savedName);
+    const loaded = loadHomileticsRecord(currentLessonId, savedName);
+    setRecord(loaded);
+    setCompletedLessons(getCompletedLessons(savedName));
+  };
+
   const handleUpdateRecord = (updated: HomileticsRecord) => {
     setRecord(updated);
-    saveHomileticsRecord(updated);
-    setCompletedLessons(getCompletedLessons());
+    saveHomileticsRecord(updated, currentUser);
+    setCompletedLessons(getCompletedLessons(currentUser));
   };
 
   const handleToggleLanguage = () => {
@@ -208,13 +222,13 @@ export default function App() {
   };
 
   const handleToggleComplete = (lessonId: string) => {
-    const rec = loadHomileticsRecord(lessonId);
+    const rec = loadHomileticsRecord(lessonId, currentUser);
     rec.isCompleted = !rec.isCompleted;
-    saveHomileticsRecord(rec);
+    saveHomileticsRecord(rec, currentUser);
     if (lessonId === currentLessonId) {
       setRecord(rec);
     }
-    setCompletedLessons(getCompletedLessons());
+    setCompletedLessons(getCompletedLessons(currentUser));
   };
 
   const handleOpenExportCurrent = () => {
@@ -255,6 +269,8 @@ export default function App() {
         onOpenExportModal={handleOpenExportCurrent}
         completedCount={completedLessons.size}
         totalLessons={30}
+        currentUser={currentUser}
+        onOpenUserSwitcher={() => setIsUserSwitcherOpen(true)}
       />
 
       {/* Main Body */}
@@ -297,8 +313,16 @@ export default function App() {
                 </button>
               </div>
 
-              {/* Lesson Metadata Pills */}
+              {/* Lesson Metadata Pills + Learner Profile Tag */}
               <div className="flex items-center gap-2 sm:gap-3 text-xs text-stone-500 flex-wrap">
+                <button
+                  onClick={() => setIsUserSwitcherOpen(true)}
+                  title={isZh ? '点击切换研经学员' : 'Click to switch learner'}
+                  className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-stone-100 hover:bg-stone-200/80 text-stone-800 font-serif font-semibold border border-stone-200 transition-colors"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                  <span>{isZh ? `学员：${currentUser}` : `Learner: ${currentUser}`}</span>
+                </button>
                 <span className="font-serif font-medium text-stone-800">
                   {isZh ? currentLesson.scriptureRange : currentLesson.scriptureRangeEn}
                 </span>
@@ -440,6 +464,7 @@ export default function App() {
               completedLessons={completedLessons}
               onToggleComplete={handleToggleComplete}
               language={language}
+              currentUser={currentUser}
             />
           </div>
         )}
@@ -452,6 +477,7 @@ export default function App() {
               language={language}
               onOpenExportModalForLesson={handleOpenExportForLesson}
               currentLessonId={currentLessonId}
+              currentUser={currentUser}
             />
           </div>
         )}
@@ -470,6 +496,16 @@ export default function App() {
         onClose={() => setIsExportOpen(false)}
         lesson={exportLesson}
         record={exportRecord}
+        language={language}
+        currentUser={currentUser}
+      />
+
+      {/* Learner Profile / Switcher Modal */}
+      <UserSwitcherModal
+        isOpen={isUserSwitcherOpen}
+        onClose={() => setIsUserSwitcherOpen(false)}
+        currentUser={currentUser}
+        onSwitchUser={handleSwitchUser}
         language={language}
       />
     </div>

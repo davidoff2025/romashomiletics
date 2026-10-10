@@ -32,6 +32,7 @@ interface OutlineSummaryViewProps {
   language: LanguageMode;
   onOpenExportModalForLesson: (lesson: Lesson, record: HomileticsRecord) => void;
   currentLessonId?: string;
+  currentUser?: string;
 }
 
 export const OutlineSummaryView: React.FC<OutlineSummaryViewProps> = ({
@@ -39,6 +40,7 @@ export const OutlineSummaryView: React.FC<OutlineSummaryViewProps> = ({
   language,
   onOpenExportModalForLesson,
   currentLessonId = '1',
+  currentUser,
 }) => {
   const isZh = language === 'zh';
 
@@ -56,7 +58,7 @@ export const OutlineSummaryView: React.FC<OutlineSummaryViewProps> = ({
   let totalStarHomiletics = 0;
 
   lessons.forEach((l) => {
-    const rec = loadHomileticsRecord(l.id);
+    const rec = loadHomileticsRecord(l.id, currentUser);
     if (l.isHomileticsStar) totalStarHomiletics++;
     if (rec.isCompleted) {
       completedCount++;
@@ -127,7 +129,13 @@ export const OutlineSummaryView: React.FC<OutlineSummaryViewProps> = ({
             </p>
           </div>
 
-          <div className="flex items-center gap-2 self-start sm:self-auto">
+          <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
+            {currentUser && (
+              <span className="text-xs font-semibold text-stone-800 bg-amber-50/70 border border-amber-200/80 px-2.5 py-1.5 rounded-lg font-serif flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                <span>{isZh ? `研经学员：${currentUser}` : `Learner: ${currentUser}`}</span>
+              </span>
+            )}
             <span className="text-xs font-medium text-stone-500 bg-stone-100 px-3 py-1.5 rounded-lg font-mono">
               {isZh ? '学年总课次：' : 'Total: '}30 {isZh ? '周' : 'Weeks'}
             </span>
@@ -360,7 +368,7 @@ export const OutlineSummaryView: React.FC<OutlineSummaryViewProps> = ({
         </div>
 
         {lessons.map((lesson) => {
-          const record = loadHomileticsRecord(lesson.id);
+          const record = loadHomileticsRecord(lesson.id, currentUser);
           const subject = isZh ? record.subjectSentenceZh : record.subjectSentenceEn;
           const aim = isZh ? record.aimZh : record.aimEn;
           const hasContent = Boolean(subject || aim || record.divisions.some((d) => d.titleZh || d.titleEn));

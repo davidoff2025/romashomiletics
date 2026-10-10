@@ -9,6 +9,7 @@ interface HomileticsExportModalProps {
   lesson: Lesson;
   record: HomileticsRecord;
   language: LanguageMode;
+  currentUser?: string;
 }
 
 export const HomileticsExportModal: React.FC<HomileticsExportModalProps> = ({
@@ -17,6 +18,7 @@ export const HomileticsExportModal: React.FC<HomileticsExportModalProps> = ({
   lesson,
   record,
   language,
+  currentUser,
 }) => {
   if (!isOpen) return null;
 
@@ -30,6 +32,9 @@ export const HomileticsExportModal: React.FC<HomileticsExportModalProps> = ({
   // Generate clean plain text format for WeChat / BSF Group submission
   const generatePlainText = () => {
     let out = `【BSF 讲道法式研经分析大纲】\n`;
+    if (currentUser) {
+      out += `研经学员：${currentUser}\n`;
+    }
     out += `课次：第 ${lesson.lessonNum} 课 (${lesson.date})\n`;
     out += `主题：${isZh ? lesson.theme : lesson.themeEn}\n`;
     out += `教义：${isZh ? lesson.doctrine : lesson.doctrineEn}\n`;
@@ -147,6 +152,11 @@ export const HomileticsExportModal: React.FC<HomileticsExportModalProps> = ({
                 <p className="font-semibold text-stone-800">{isZh ? lesson.scriptureRange : lesson.scriptureRangeEn}</p>
                 <p>教义：{isZh ? lesson.doctrine : lesson.doctrineEn}</p>
                 <p>{lesson.date}</p>
+                {currentUser && (
+                  <p className="font-serif font-bold text-stone-900 mt-0.5">
+                    {isZh ? `研经学员：${currentUser}` : `Learner: ${currentUser}`}
+                  </p>
+                )}
               </div>
             </div>
           </div>
