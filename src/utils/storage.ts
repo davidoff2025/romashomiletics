@@ -4,6 +4,17 @@ const LEGACY_STORAGE_PREFIX = 'bsf_romans_2026_';
 const CURRENT_USER_KEY = 'bsf_romans_active_user';
 const USERS_LIST_KEY = 'bsf_romans_user_list';
 export const DEFAULT_USER = 'Devin Wang';
+export const SUGGESTED_USERS = ['Devin Wang', 'Larrylu'];
+
+export function hasActiveUserSet(): boolean {
+  try {
+    const saved = localStorage.getItem(CURRENT_USER_KEY);
+    return Boolean(saved && saved.trim());
+  } catch (err) {
+    console.error('Failed to check active user:', err);
+    return false;
+  }
+}
 
 export function getActiveUser(): string {
   try {
@@ -44,7 +55,7 @@ export function getUserList(): string[] {
   } catch (err) {
     console.error('Failed to get user list:', err);
   }
-  return [DEFAULT_USER];
+  return [...SUGGESTED_USERS];
 }
 
 export function deleteUserProfile(userName: string): string {

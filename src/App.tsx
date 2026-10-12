@@ -4,6 +4,7 @@ import { BSF_CURRICULUM } from './data/curriculum';
 import {
   getActiveUser,
   setActiveUser,
+  hasActiveUserSet,
   DEFAULT_USER,
   loadHomileticsRecord,
   saveHomileticsRecord,
@@ -34,8 +35,9 @@ export default function App() {
   const [currentLessonId, setCurrentLessonId] = useState<string>('1');
   const [currentWorkbenchStep, setCurrentWorkbenchStep] = useState<number>(1);
   const [mobileWorkbenchView, setMobileWorkbenchView] = useState<'coach' | 'scripture' | 'split'>('coach');
+  const [isFirstVisit, setIsFirstVisit] = useState<boolean>(() => !hasActiveUserSet());
   const [currentUser, setCurrentUser] = useState<string>(() => getActiveUser());
-  const [isUserSwitcherOpen, setIsUserSwitcherOpen] = useState(false);
+  const [isUserSwitcherOpen, setIsUserSwitcherOpen] = useState<boolean>(() => !hasActiveUserSet());
   const [completedLessons, setCompletedLessons] = useState<Set<string>>(() => getCompletedLessons(getActiveUser()));
 
   // Current homiletics record
@@ -201,6 +203,7 @@ export default function App() {
   const handleSwitchUser = (newUserName: string) => {
     const savedName = setActiveUser(newUserName);
     setCurrentUser(savedName);
+    setIsFirstVisit(false);
     const loaded = loadHomileticsRecord(currentLessonId, savedName);
     setRecord(loaded);
     setCompletedLessons(getCompletedLessons(savedName));
@@ -507,6 +510,7 @@ export default function App() {
         currentUser={currentUser}
         onSwitchUser={handleSwitchUser}
         language={language}
+        isFirstVisit={isFirstVisit}
       />
     </div>
   );
